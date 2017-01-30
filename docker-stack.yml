@@ -43,35 +43,35 @@ services:
 # Adds a cron to process spans since midnight every hour, and all spans each day
 # This data is served by http://192.168.99.100:8080/dependency
  # For more details, see https://github.com/openzipkin/docker-zipkin-dependencies
- dependencies:
-   image: openzipkin/zipkin-dependencies
-   entrypoint: crond -f
-   networks:
-     - frontend
-   environment:
-     - STORAGE_TYPE=elasticsearch
-     - ES_HOSTS=elasticsearch
-   depends_on:
-     - elasticsearch
-   #deploy:
-     #placement:
-       #constraints: [node.role == manager]
+  dependencies:
+    image: openzipkin/zipkin-dependencies
+    entrypoint: crond -f
+    networks:
+      - frontend
+    environment:
+      - STORAGE_TYPE=elasticsearch
+      - ES_HOSTS=elasticsearch
+    depends_on:
+      - elasticsearch
+    #deploy:
+      #placement:
+        #constraints: [node.role == manager]
 
 
 
- visualizer:
-   image: dockersamples/visualizer:stable
-   ports:
-     - 8080:8080
-   networks:
-     - frontend
-   stop_grace_period: 1m30s
-   volumes:
-     - "/var/run/docker.sock:/var/run/docker.sock"
-   deploy:
-     placement:
-       constraints: [node.role == manager]
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - 8080:8080
+    networks:
+      - frontend
+    stop_grace_period: 1m30s
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
 
 
 networks:
- frontend:
+  frontend:
