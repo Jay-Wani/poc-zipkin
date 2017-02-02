@@ -1,0 +1,93 @@
+version: "3"
+services:
+
+
+  # Run Elasticsearch as the Storage for Zipkin
+  elasticsearch:
+    image: openzipkin/zipkin-elasticsearch:1.19.0
+    ports:
+      - "9300"
+      - "9200"
+    networks:
+      - frontend
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+  # Switch storage type to Elasticsearch
+  zipkin:
+    image: openzipkin/zipkin:1.19.0
+    environment:
+      - STORAGE_TYPE=elasticsearch
+      # Point the zipkin at the storage backend
+      - ES_HOSTS=http://elasticsearch:9200
+    ports:
+      # Listen port for the Scribe transport
+      - 9410:9410
+      # Port used for the Zipkin UI and HTTP Api
+      - 9411:9411
+    networks:
+      - frontend
+    depends_on:
+      - elasticsearch
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+
+
+# Adds a cron to process spans since midnight every hour, and all spans each day
+# This data is served by http://192.168.99.100:8080/dependency
+ # For more details, see https://github.com/openzipkin/docker-zipkin-dependencies
+  dependencies:
+    image: openzipkin/zipkin-dependencies
+    entrypoint: crond -f
+    networks:
+      - frontend
+    environment:
+      - STORAGE_TYPE=elasticsearch
+      - ES_HOSTS=elasticsearch
+    depends_on:
+      - elasticsearch
+    #deploy:
+      #placement:
+        #constraints: [node.role == manager]
+
+
+
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - 8080:8080
+    networks:
+      - frontend
+    stop_grace_period: 1m30s
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+
+  portainer:
+    image: portainer/portainer:latest
+    ports:
+      - 8090:8080
+    networks:
+      - frontend
+    stop_grace_period: 1m30s
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
+
+
+
+networks:
+  frontend:
