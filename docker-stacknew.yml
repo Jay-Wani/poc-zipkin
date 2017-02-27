@@ -76,7 +76,7 @@ services:
   portainer:
     image: portainer/portainer:latest
     ports:
-      - 8090:8080
+      - 9000:9000
     networks:
       - frontend
     stop_grace_period: 1m30s
