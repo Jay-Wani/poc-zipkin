@@ -86,8 +86,8 @@ services:
 #      placement:
 #        constraints: [node.role == manager]
 
- cadvisor:
-    image:google/cadvisor:latest
+  cadvisor:
+    image: google/cadvisor:latest
     ports:
       - 9000:8080
     volumes:
