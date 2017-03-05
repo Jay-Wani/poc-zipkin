@@ -8,6 +8,8 @@ services:
     ports:
       - 9300:9300
       - 9200:9200
+    volumes:
+      - /opt/zipkin/data/elastic/data:/var/lib/elasticsearch
     networks:
       - frontend
     deploy:
